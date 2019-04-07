@@ -1,5 +1,3 @@
-import 'dart:math';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
@@ -96,30 +94,49 @@ void reveal(List state, i) {
   }
 }
 
+Future<void> restart(BuildContext context, bool success, f) {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('You ${success ? "Win" : "lose"}!'),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Restart'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              f();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
 class _HomeContentState extends State<HomeContent>{
   List state = [];
-  int finish = 0;
   @override
   void initState() {
     setState(() {
-      state = List.generate(LEN, (i) => i < LEN / 5 ? -1 : 0)..shuffle();
-      finish = 0;
+      state = List.generate(LEN, (i) => i < LEN / 15 ? -1 : 0)..shuffle();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     var buttons = List.from(state.asMap().keys).map((i) => ButtonTheme(
-      // minWidth: 36,
-      // height: 36,
       child: GestureDetector(
         onLongPress: () {
-          debugPrint('long press');
           // -1 is unchecked
           // -2 is marked correct
           // -3 is marked incorrect
           // -4 is clicked incorrect
           setState(() {
+            if (state[i] > 0) {
+              return;
+            }
             if (state[i] == -1) {
               state[i] = -2;
             } else if (state[i] == -2 || state[i] == -3) {
@@ -131,19 +148,18 @@ class _HomeContentState extends State<HomeContent>{
         },
         child: RaisedButton(
           child: Text(getContent(state[i])),
-          // disabledColor: Colors.white,
           onPressed: state[i] <= 0 ? () {
             setState(() {
               if (state[i] == -1) {
                 state[i] = -4;
-                return finish = -1;
+                restart(context, false, this.initState);
+                return;
               }
-              if (state[i] < -1) {
-                return state[i];
+              if (state[i] > -1) {
+                reveal(state, i);
               }
-              reveal(state, i);
               if (state.indexOf(0) == -1 && state.indexOf(-4) == -1) {
-                finish = 1;
+                restart(context, true, this.initState);
               }
             });
           } : null,
@@ -161,132 +177,6 @@ class _HomeContentState extends State<HomeContent>{
           children: buttons.toList(),
         ),
       // ),
-    );
-  }
-}
-
-class MyPainter extends CustomPainter{
-  Color lineColor;
-  Color completeColor;
-  double completePercent;
-  double width;
-  MyPainter({this.lineColor,this.completeColor,this.completePercent,this.width});
-  @override
-  void paint(Canvas canvas, Size size) {
-    Paint line = new Paint()
-        ..color = lineColor
-        ..strokeCap = StrokeCap.round
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = width;
-    Paint complete = new Paint()
-      ..color = completeColor
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = width;
-    Offset center  = new Offset(size.width/2, size.height/2);
-    double radius  = min(size.width/2,size.height/2);
-    canvas.drawCircle(
-        center,
-        radius,
-        line
-    );
-    double arcAngle = 2*pi* (completePercent/100);
-    canvas.drawArc(
-        new Rect.fromCircle(center: center,radius: radius),
-        -pi/2,
-        arcAngle,
-        false,
-        complete
-    );
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return true;
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
