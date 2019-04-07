@@ -120,7 +120,7 @@ class _HomeContentState extends State<HomeContent>{
   @override
   void initState() {
     setState(() {
-      state = List.generate(LEN, (i) => i < LEN / 15 ? -1 : 0)..shuffle();
+      state = List.generate(LEN, (i) => i < LEN / 5 ? -1 : 0)..shuffle();
     });
   }
 
