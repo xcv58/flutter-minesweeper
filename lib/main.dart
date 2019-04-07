@@ -1,13 +1,17 @@
+import 'dart:math';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
+
+var N = 8, M = 30, LEN = M * N;
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter Experiments 123',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -20,8 +24,201 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: Home(),
     );
+  }
+}
+
+class Home extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: new AppBar(
+        elevation: 0.0,
+        title: new Text("Flutter Experiments",
+          style: new TextStyle(
+            color: Colors.white,
+            fontFamily: 'Nunito',
+            letterSpacing: 1.0
+          ),
+        ),
+        backgroundColor: new Color(0xFF2979FF),
+        centerTitle: true
+      ),
+      body:new HomeContent()
+    );
+  }
+}
+
+class HomeContent extends StatefulWidget {
+  @override
+  _HomeContentState createState() => _HomeContentState();
+}
+
+String getContent(n) {
+  if (n == -4) {
+    return "💀";
+  }
+  if (n == -2 || n == -3) {
+    return "💣";
+  }
+  if (n > 0 && n < 9) {
+    return n.toString();
+  }
+  return "";
+}
+
+class _HomeContentState extends State<HomeContent>{
+  List state = [];
+  int finish = 0;
+  @override
+  void initState() {
+    setState(() {
+      state = List.generate(LEN, (i) => i < LEN / 5 ? -1 : 0)..shuffle();
+      finish = 0;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var buttons = List.from(state.asMap().keys).map((i) => ButtonTheme(
+      // minWidth: 36,
+      // height: 36,
+      child: GestureDetector(
+        onLongPress: () {
+          debugPrint('long press');
+          // -1 is unchecked
+          // -2 is marked correct
+          // -3 is marked incorrect
+          // -4 is clicked incorrect
+          setState(() {
+            if (state[i] == -1) {
+              state[i] = -2;
+            } else if (state[i] == -2 || state[i] == -3) {
+              state[i] = 0;
+            } else {
+              state[i] = -3;
+            }
+          });
+        },
+        child: RaisedButton(
+          child: Text(getContent(state[i])),
+          onPressed: state[i] <= 0 ? () {
+            // TODO: if current = -1, fail
+            setState(() {
+            // TODO: collect number
+              if (state[i] == -1) {
+                state[i] = -4;
+                return finish = -1;
+              }
+              if (state[i] < -1) {
+                return state[i];
+              }
+              var x = (i / N).toInt(), y = i % N;
+              debugPrint('onPressed index: ${i}; ${x}, ${y}');
+              var count = 0;
+              for (var i = -1; i < 2; i++) {
+                for (var j = -1; j < 2; j++) {
+                  var xi = x + i, yj = y + j;
+                  debugPrint('$xi, $yj');
+                  if (xi < 0 || xi >= M) {
+                    continue;
+                  }
+                  if (yj < 0 || yj >= N) {
+                    continue;
+                  }
+                  var neighbor = state[xi*N+yj];
+                  debugPrint('$xi, $yj: state[${xi*N+yj}] = $neighbor');
+                  count += (neighbor == -1 || neighbor == -2) ? 1 : 0;
+                }
+              }
+              state[i] = count == 0 ? 9 : count;
+            });
+          } : null,
+      ),
+      )
+    )
+    );
+    return new Center(
+      // child: CustomPaint(
+        child: GridView.count(
+          crossAxisCount: N,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          // padding: 10,
+          padding: const EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 30),
+          children: buttons.toList(),
+        ),
+      // ),
+    );
+    // return new Center(
+    //   child: new Container(
+    //     height: 100,
+    //     width: 100,
+    //     child: new CustomPaint(
+    //       foregroundPainter: new MyPainter(
+    //           lineColor: Colors.amber,
+    //           completeColor: Colors.blueAccent,
+    //           completePercent: percentage,
+    //           width: 0
+    //       ),
+    //       child: new Padding(
+    //         padding: const EdgeInsets.all(8.0),
+    //         child: new RaisedButton(
+    //             color: Colors.purple,
+    //             splashColor: Colors.blueAccent,
+    //             shape: new RoundedRectangleBorder(),
+    //             // shape: new CircleBorder(),
+    //             child: new Text("1"),
+    //             // onPressed: () { setState(() { percentage += 10.0; if(percentage>100.0){ percentage=0.0; } }); }
+    //             // onPressed: null,
+    //             onPressed: () { return null; },
+    //             ),
+    //       ),
+    //     ),
+    //   ),
+    // );
+  }
+}
+
+class MyPainter extends CustomPainter{
+  Color lineColor;
+  Color completeColor;
+  double completePercent;
+  double width;
+  MyPainter({this.lineColor,this.completeColor,this.completePercent,this.width});
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint line = new Paint()
+        ..color = lineColor
+        ..strokeCap = StrokeCap.round
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = width;
+    Paint complete = new Paint()
+      ..color = completeColor
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = width;
+    Offset center  = new Offset(size.width/2, size.height/2);
+    double radius  = min(size.width/2,size.height/2);
+    canvas.drawCircle(
+        center,
+        radius,
+        line
+    );
+    double arcAngle = 2*pi* (completePercent/100);
+    canvas.drawArc(
+        new Rect.fromCircle(center: center,radius: radius),
+        -pi/2,
+        arcAngle,
+        false,
+        complete
+    );
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
   }
 }
 
