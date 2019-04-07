@@ -7,25 +7,9 @@ void main() => runApp(MyApp());
 var N = 8, M = 30, LEN = M * N;
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Experiments 123',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: Home(),
-    );
+    return MaterialApp(home: Home());
   }
 }
 
@@ -34,15 +18,8 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: new AppBar(
-        elevation: 0.0,
-        title: new Text("Flutter Experiments",
-          style: new TextStyle(
-            color: Colors.white,
-            fontFamily: 'Nunito',
-            letterSpacing: 1.0
-          ),
-        ),
-        backgroundColor: new Color(0xFF2979FF),
+        elevation: 0,
+        title: new Text("Flutter Minesweeper"),
         centerTitle: true
       ),
       body:new HomeContent()
@@ -56,6 +33,7 @@ class HomeContent extends StatefulWidget {
 }
 
 String getContent(n) {
+  // return n.toString();
   if (n == -4) {
     return "💀";
   }
@@ -66,6 +44,56 @@ String getContent(n) {
     return n.toString();
   }
   return "";
+}
+
+void spread(state, t) {
+  var x = (t / N).toInt(), y = t % N;
+  for (var i = -1; i < 2; i++) {
+    for (var j = -1; j < 2; j++) {
+      var xi = x + i, yj = y + j;
+      debugPrint('$xi, $yj');
+      if (xi < 0 || xi >= M) {
+        continue;
+      }
+      if (yj < 0 || yj >= N) {
+        continue;
+      }
+      var neighbor = state[xi*N+yj];
+      if (neighbor == 0) {
+        reveal(state, xi*N+yj);
+      }
+    }
+  }
+}
+
+void reveal(List state, i) {
+  if (state[i] != 0) {
+    return;
+  }
+  var x = (i / N).toInt(), y = i % N;
+  debugPrint('onPressed index: ${i}; ${x}, ${y}');
+  var count = 0;
+  for (var i = -1; i < 2; i++) {
+    for (var j = -1; j < 2; j++) {
+      var xi = x + i, yj = y + j;
+      debugPrint('$xi, $yj');
+      if (xi < 0 || xi >= M) {
+        continue;
+      }
+      if (yj < 0 || yj >= N) {
+        continue;
+      }
+      var neighbor = state[xi*N+yj];
+      debugPrint('$xi, $yj: state[${xi*N+yj}] = $neighbor');
+      count += (neighbor < 0 && neighbor != -3) ? 1 : 0;
+    }
+  }
+  if (count > 0) {
+    state[i] = count;
+  } else {
+    state[i] = 9;
+    spread(state, i);
+  }
 }
 
 class _HomeContentState extends State<HomeContent>{
@@ -103,10 +131,9 @@ class _HomeContentState extends State<HomeContent>{
         },
         child: RaisedButton(
           child: Text(getContent(state[i])),
+          // disabledColor: Colors.white,
           onPressed: state[i] <= 0 ? () {
-            // TODO: if current = -1, fail
             setState(() {
-            // TODO: collect number
               if (state[i] == -1) {
                 state[i] = -4;
                 return finish = -1;
@@ -114,25 +141,10 @@ class _HomeContentState extends State<HomeContent>{
               if (state[i] < -1) {
                 return state[i];
               }
-              var x = (i / N).toInt(), y = i % N;
-              debugPrint('onPressed index: ${i}; ${x}, ${y}');
-              var count = 0;
-              for (var i = -1; i < 2; i++) {
-                for (var j = -1; j < 2; j++) {
-                  var xi = x + i, yj = y + j;
-                  debugPrint('$xi, $yj');
-                  if (xi < 0 || xi >= M) {
-                    continue;
-                  }
-                  if (yj < 0 || yj >= N) {
-                    continue;
-                  }
-                  var neighbor = state[xi*N+yj];
-                  debugPrint('$xi, $yj: state[${xi*N+yj}] = $neighbor');
-                  count += (neighbor == -1 || neighbor == -2) ? 1 : 0;
-                }
+              reveal(state, i);
+              if (state.indexOf(0) == -1 && state.indexOf(-4) == -1) {
+                finish = 1;
               }
-              state[i] = count == 0 ? 9 : count;
             });
           } : null,
       ),
@@ -143,41 +155,13 @@ class _HomeContentState extends State<HomeContent>{
       // child: CustomPaint(
         child: GridView.count(
           crossAxisCount: N,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          // padding: 10,
-          padding: const EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 30),
+          crossAxisSpacing: 7,
+          mainAxisSpacing: 7,
+          padding: const EdgeInsets.only(left: 7, right: 7, top: 7, bottom: 30),
           children: buttons.toList(),
         ),
       // ),
     );
-    // return new Center(
-    //   child: new Container(
-    //     height: 100,
-    //     width: 100,
-    //     child: new CustomPaint(
-    //       foregroundPainter: new MyPainter(
-    //           lineColor: Colors.amber,
-    //           completeColor: Colors.blueAccent,
-    //           completePercent: percentage,
-    //           width: 0
-    //       ),
-    //       child: new Padding(
-    //         padding: const EdgeInsets.all(8.0),
-    //         child: new RaisedButton(
-    //             color: Colors.purple,
-    //             splashColor: Colors.blueAccent,
-    //             shape: new RoundedRectangleBorder(),
-    //             // shape: new CircleBorder(),
-    //             child: new Text("1"),
-    //             // onPressed: () { setState(() { percentage += 10.0; if(percentage>100.0){ percentage=0.0; } }); }
-    //             // onPressed: null,
-    //             onPressed: () { return null; },
-    //             ),
-    //       ),
-    //     ),
-    //   ),
-    // );
   }
 }
 
