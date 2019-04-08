@@ -15,6 +15,17 @@ For help getting started with Flutter, view our
 [online documentation](https://flutter.io/docs), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
+## Install on Real Device(s)
+
+To install on real device(s). Please make sure your device is connected to develop machine.
+For iOS you need to log in a valid iOS developer account to doe [code signing](https://developer.apple.com/support/code-signing/).
+
+Then run below command to install on the device:
+
+```bash
+flutter run --release -d <deviceId>
+```
+
 ## Development Reference
 
 This project uses an array of int to represent the state:

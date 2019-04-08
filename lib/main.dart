@@ -97,6 +97,10 @@ class _Home extends State<Home> {
   List state = [];
   @override
   void initState() {
+    super.initState();
+    reset();
+  }
+  void reset() {
     setState(() {
       state = List.generate(LEN, (i) => i < LEN / 5 ? -1 : 0)..shuffle();
     });
@@ -118,6 +122,7 @@ class _Home extends State<Home> {
               } else {
                 state[i] = -3;
               }
+              Feedback.forLongPress(context);
             });
           },
           child: RaisedButton(
@@ -128,14 +133,14 @@ class _Home extends State<Home> {
                     setState(() {
                       if (state[i] == -1) {
                         state[i] = -4;
-                        restart(context, false, this.initState);
+                        restart(context, false, reset);
                         return;
                       }
                       if (state[i] > -1) {
                         reveal(state, i);
                       }
                       if (state.indexOf(0) == -1 && state.indexOf(-4) == -1) {
-                        restart(context, true, this.initState);
+                        restart(context, true, reset);
                       }
                     });
                   }
