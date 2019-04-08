@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 
-void main() => runApp(Home());
+void main() => runApp(App());
 
 var N = 8, M = 30, LEN = M * N;
 
-class Home extends StatelessWidget {
+class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: new AppBar(
-            title: new Text("Flutter Minesweeper"), centerTitle: true),
-        body: new Content());
+    return MaterialApp(
+        home: Scaffold(
+            appBar: new AppBar(
+                title: new Text("Flutter Minesweeper"), centerTitle: true),
+            body: new Home()));
   }
 }
 
-class Content extends StatefulWidget {
+class Home extends StatefulWidget {
   @override
-  _Content createState() => _Content();
+  _Home createState() => _Home();
 }
 
 String getContent(n) {
@@ -92,7 +93,7 @@ Future<void> restart(BuildContext context, bool success, f) {
   );
 }
 
-class _Content extends State<Content> {
+class _Home extends State<Home> {
   List state = [];
   @override
   void initState() {
