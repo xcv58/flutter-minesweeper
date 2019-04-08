@@ -1,27 +1,16 @@
 import 'package:flutter/material.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(Home());
 
 var N = 8, M = 30, LEN = M * N;
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(home: Home());
-  }
-}
 
 class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: new AppBar(
-        elevation: 0,
-        title: new Text("Flutter Minesweeper"),
-        centerTitle: true
-      ),
-      body:new HomeContent()
-    );
+        appBar: new AppBar(
+            title: new Text("Flutter Minesweeper"), centerTitle: true),
+        body: new HomeContent());
   }
 }
 
@@ -31,7 +20,6 @@ class HomeContent extends StatefulWidget {
 }
 
 String getContent(n) {
-  // return n.toString();
   if (n == -4) {
     return "💀";
   }
@@ -45,27 +33,23 @@ String getContent(n) {
 }
 
 List<int> getNeighbors(int i) {
-  var x = (i / N).toInt(), y = i % N;
+  var x = i ~/ N, y = i % N;
   var list = List<int>();
   for (var i = -1; i < 2; i++) {
     for (var j = -1; j < 2; j++) {
       var xi = x + i, yj = y + j;
-      if (xi < 0 || xi >= M) {
-        continue;
-      }
-      if (yj < 0 || yj >= N) {
+      if (xi < 0 || xi >= M || yj < 0 || yj >= N || (i == 0 && j == 0)) {
         continue;
       }
       list.add(xi * N + yj);
     }
   }
-  debugPrint(list.toString());
   return list;
 }
 
 void spread(state, i) {
   getNeighbors(i).forEach((x) {
-    if(state[x] == 0) {
+    if (state[x] == 0) {
       reveal(state, x);
     }
   });
@@ -108,7 +92,7 @@ Future<void> restart(BuildContext context, bool success, f) {
   );
 }
 
-class _HomeContentState extends State<HomeContent>{
+class _HomeContentState extends State<HomeContent> {
   List state = [];
   @override
   void initState() {
@@ -120,56 +104,55 @@ class _HomeContentState extends State<HomeContent>{
   @override
   Widget build(BuildContext context) {
     var buttons = List.from(state.asMap().keys).map((i) => ButtonTheme(
-      child: GestureDetector(
-        onLongPress: () {
-          // -1 is unchecked
-          // -2 is marked correct
-          // -3 is marked incorrect
-          // -4 is clicked incorrect
-          setState(() {
-            if (state[i] > 0) {
-              return;
-            }
-            if (state[i] == -1) {
-              state[i] = -2;
-            } else if (state[i] == -2 || state[i] == -3) {
-              state[i] = 0;
-            } else {
-              state[i] = -3;
-            }
-          });
-        },
-        child: RaisedButton(
-          child: Text(getContent(state[i]), textAlign: TextAlign.center, style: TextStyle(fontSize: 25)),
-          onPressed: state[i] <= 0 ? () {
+            child: GestureDetector(
+          onLongPress: () {
+            // -1 is unchecked
+            // -2 is marked correct
+            // -3 is marked incorrect
+            // -4 is clicked incorrect
             setState(() {
-              if (state[i] == -1) {
-                state[i] = -4;
-                restart(context, false, this.initState);
+              if (state[i] > 0) {
                 return;
               }
-              if (state[i] > -1) {
-                reveal(state, i);
-              }
-              if (state.indexOf(0) == -1 && state.indexOf(-4) == -1) {
-                restart(context, true, this.initState);
+              if (state[i] == -1) {
+                state[i] = -2;
+              } else if (state[i] == -2 || state[i] == -3) {
+                state[i] = 0;
+              } else {
+                state[i] = -3;
               }
             });
-          } : null,
-      ),
-      )
-    )
-    );
+          },
+          child: RaisedButton(
+            child: Text(getContent(state[i]),
+                textAlign: TextAlign.center, style: TextStyle(fontSize: 25)),
+            onPressed: state[i] <= 0
+                ? () {
+                    setState(() {
+                      if (state[i] == -1) {
+                        state[i] = -4;
+                        restart(context, false, this.initState);
+                        return;
+                      }
+                      if (state[i] > -1) {
+                        reveal(state, i);
+                      }
+                      if (state.indexOf(0) == -1 && state.indexOf(-4) == -1) {
+                        restart(context, true, this.initState);
+                      }
+                    });
+                  }
+                : null,
+          ),
+        )));
     return new Center(
-      // child: CustomPaint(
-        child: GridView.count(
-          crossAxisCount: N,
-          crossAxisSpacing: 7,
-          mainAxisSpacing: 7,
-          padding: const EdgeInsets.only(left: 7, right: 7, top: 7, bottom: 30),
-          children: buttons.toList(),
-        ),
-      // ),
+      child: GridView.count(
+        crossAxisCount: N,
+        crossAxisSpacing: 7,
+        mainAxisSpacing: 7,
+        padding: const EdgeInsets.only(left: 7, right: 7, top: 7, bottom: 30),
+        children: buttons.toList(),
+      ),
     );
   }
 }
