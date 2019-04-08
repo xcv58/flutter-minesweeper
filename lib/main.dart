@@ -44,48 +44,41 @@ String getContent(n) {
   return "";
 }
 
-void spread(state, t) {
-  var x = (t / N).toInt(), y = t % N;
+List<int> getNeighbors(int i) {
+  var x = (i / N).toInt(), y = i % N;
+  var list = List<int>();
   for (var i = -1; i < 2; i++) {
     for (var j = -1; j < 2; j++) {
       var xi = x + i, yj = y + j;
-      debugPrint('$xi, $yj');
       if (xi < 0 || xi >= M) {
         continue;
       }
       if (yj < 0 || yj >= N) {
         continue;
       }
-      var neighbor = state[xi*N+yj];
-      if (neighbor == 0) {
-        reveal(state, xi*N+yj);
-      }
+      list.add(xi * N + yj);
     }
   }
+  debugPrint(list.toString());
+  return list;
+}
+
+void spread(state, i) {
+  getNeighbors(i).forEach((x) {
+    if(state[x] == 0) {
+      reveal(state, x);
+    }
+  });
 }
 
 void reveal(List state, i) {
   if (state[i] != 0) {
     return;
   }
-  var x = (i / N).toInt(), y = i % N;
-  debugPrint('onPressed index: ${i}; ${x}, ${y}');
-  var count = 0;
-  for (var i = -1; i < 2; i++) {
-    for (var j = -1; j < 2; j++) {
-      var xi = x + i, yj = y + j;
-      debugPrint('$xi, $yj');
-      if (xi < 0 || xi >= M) {
-        continue;
-      }
-      if (yj < 0 || yj >= N) {
-        continue;
-      }
-      var neighbor = state[xi*N+yj];
-      debugPrint('$xi, $yj: state[${xi*N+yj}] = $neighbor');
-      count += (neighbor < 0 && neighbor != -3) ? 1 : 0;
-    }
-  }
+  var count = getNeighbors(i).map((x) {
+    var neighbor = state[x];
+    return (neighbor < 0 && neighbor != -3) ? 1 : 0;
+  }).reduce((a, b) => a + b);
   if (count > 0) {
     state[i] = count;
   } else {
@@ -147,7 +140,7 @@ class _HomeContentState extends State<HomeContent>{
           });
         },
         child: RaisedButton(
-          child: Text(getContent(state[i])),
+          child: Text(getContent(state[i]), textAlign: TextAlign.center, style: TextStyle(fontSize: 25)),
           onPressed: state[i] <= 0 ? () {
             setState(() {
               if (state[i] == -1) {
