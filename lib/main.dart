@@ -29,17 +29,17 @@ String getContent(n) {
 
 List<int> getNeighbors(int i, int M, int N) {
   var x = i ~/ N, y = i % N;
-  var list = List<int>();
+  var res = List<int>();
   for (var i = -1; i < 2; i++) {
     for (var j = -1; j < 2; j++) {
       var xi = x + i, yj = y + j;
       if (xi < 0 || xi >= M || yj < 0 || yj >= N || (i == 0 && j == 0)) {
         continue;
       }
-      list.add(xi * N + yj);
+      res.add(xi * N + yj);
     }
   }
-  return list;
+  return res;
 }
 
 void spread(List<int> state, int i, int M, int N) {
@@ -66,14 +66,14 @@ void reveal(List<int> state, int i, int M, int N) {
   }
 }
 
-Future<void> restart(BuildContext context, bool success, f) {
-  return showDialog<void>(
+restart(BuildContext context, bool win, f) {
+  return showDialog(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text('You ${success ? "Win" : "lose"}!'),
-        actions: <Widget>[
+        title: Text('You ${win ? "Win" : "Lose"}!'),
+        actions: [
           FlatButton(
             child: Text('Restart'),
             onPressed: () {
@@ -87,23 +87,36 @@ Future<void> restart(BuildContext context, bool success, f) {
   );
 }
 
-Future<void> settings(BuildContext context, f) {
-  return showDialog<void>(
+settings(BuildContext context, int M, int N, mf, nf, cb) {
+  return showDialog(
     context: context,
-    barrierDismissible: false,
     builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Settings'),
-        actions: <Widget>[
-          FlatButton(
-            child: Text('Restart'),
-            onPressed: () {
-              Navigator.of(context).pop();
-              f();
-            },
+      var content = Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            decoration: InputDecoration(labelText: "Row"),
+            keyboardType: TextInputType.number,
+            onChanged: mf,
+          ),
+          TextField(
+            decoration: InputDecoration(labelText: "Column"),
+            keyboardType: TextInputType.number,
+            onChanged: nf,
           ),
         ],
       );
+      var actions = [
+        FlatButton(
+          child: Text('Submit'),
+          onPressed: () {
+            Navigator.of(context).pop();
+            cb();
+          },
+        ),
+      ];
+      return AlertDialog(
+          title: Text('Setting'), content: content, actions: actions);
     },
   );
 }
@@ -119,64 +132,84 @@ class _Home extends State<Home> {
 
   void reset() {
     setState(() {
-      state = List.generate(M*N, (i) => i < M*N / 5 ? -1 : 0)..shuffle();
+      state = List.generate(M * N, (i) => i < M * N / 5 ? -1 : 0)..shuffle();
     });
+  }
+
+  Widget _button(i) {
+    var onPressed = () {
+      setState(() {
+        if (state[i] == -1) {
+          state[i] = -4;
+          restart(context, false, reset);
+          return;
+        }
+        if (state[i] > -1) {
+          reveal(state, i, M, N);
+        }
+        if (state.indexOf(0) == -1 && state.indexOf(-4) == -1) {
+          restart(context, true, reset);
+        }
+      });
+    };
+    var child = FlatButton(
+        color: Colors.blue,
+        disabledColor: Colors.grey,
+        child: Text(getContent(state[i]),
+            textAlign: TextAlign.center, style: TextStyle(fontSize: 25)),
+        onPressed: state[i] <= 0 ? onPressed : null);
+    return GestureDetector(
+      onLongPress: () {
+        setState(() {
+          if (state[i] > 0) {
+            return;
+          }
+          if (state[i] == -1) {
+            state[i] = -2;
+          } else if (state[i] == -2 || state[i] == -3) {
+            state[i] = 0;
+          } else {
+            state[i] = -3;
+          }
+          Feedback.forLongPress(context);
+        });
+      },
+      child: child,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    var buttons = List.from(state.asMap().keys).map((i) => ButtonTheme(
-            child: GestureDetector(
-          onLongPress: () {
+    var buttons = List.from(state.asMap().keys).map(_button);
+    var actions = [
+      IconButton(
+        icon: Icon(Icons.settings),
+        onPressed: () {
+          settings(context, M, N, (String m) {
             setState(() {
-              if (state[i] > 0) {
-                return;
-              }
-              if (state[i] == -1) {
-                state[i] = -2;
-              } else if (state[i] == -2 || state[i] == -3) {
-                state[i] = 0;
-              } else {
-                state[i] = -3;
-              }
-              Feedback.forLongPress(context);
+              M = int.parse(m);
             });
-          },
-          child: RaisedButton(
-            child: Text(getContent(state[i]),
-                textAlign: TextAlign.center, style: TextStyle(fontSize: 25)),
-            onPressed: state[i] <= 0
-                ? () {
-                    setState(() {
-                      if (state[i] == -1) {
-                        state[i] = -4;
-                        restart(context, false, reset);
-                        return;
-                      }
-                      if (state[i] > -1) {
-                        reveal(state, i, M, N);
-                      }
-                      if (state.indexOf(0) == -1 && state.indexOf(-4) == -1) {
-                        restart(context, true, reset);
-                      }
-                    });
-                  }
-                : null,
-          ),
-        )));
-    return MaterialApp(
-        home: Scaffold(
-            appBar: new AppBar(
-                title: new Text("Flutter Minesweeper"), centerTitle: true),
-            body: Center(
-              child: GridView.count(
-                crossAxisCount: N,
-                crossAxisSpacing: 7,
-                mainAxisSpacing: 7,
-                padding: const EdgeInsets.only(
-                    left: 7, right: 7, top: 7, bottom: 30),
-                children: buttons.toList(),
-              ),
-            )));
+          }, (String n) {
+            setState(() {
+              N = int.parse(n);
+            });
+          }, reset);
+        },
+      )
+    ];
+    var appBar = AppBar(
+        title: new Text("Flutter Minesweeper"),
+        centerTitle: true,
+        actions: actions);
+    var body = Center(
+      child: GridView.count(
+        crossAxisCount: N,
+        crossAxisSpacing: 7,
+        mainAxisSpacing: 7,
+        padding: EdgeInsets.fromLTRB(7, 7, 7, 30),
+        children: buttons.toList(),
+      ),
+    );
+    return MaterialApp(home: Scaffold(appBar: appBar, body: body));
   }
 }
