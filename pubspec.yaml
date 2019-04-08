@@ -1,5 +1,5 @@
-name: flutter_create
-description: A new Flutter project.
+name: flutter_minesweeper
+description: A Flutter Minesweeper.
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43

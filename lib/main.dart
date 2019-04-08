@@ -2,16 +2,10 @@ import 'package:flutter/material.dart';
 
 void main() => runApp(App());
 
-var N = 8, M = 30, LEN = M * N;
-
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        home: Scaffold(
-            appBar: new AppBar(
-                title: new Text("Flutter Minesweeper"), centerTitle: true),
-            body: new Home()));
+    return MaterialApp(home: Home());
   }
 }
 
@@ -33,7 +27,7 @@ String getContent(n) {
   return "";
 }
 
-List<int> getNeighbors(int i) {
+List<int> getNeighbors(int i, int M, int N) {
   var x = i ~/ N, y = i % N;
   var list = List<int>();
   for (var i = -1; i < 2; i++) {
@@ -48,19 +42,19 @@ List<int> getNeighbors(int i) {
   return list;
 }
 
-void spread(state, i) {
-  getNeighbors(i).forEach((x) {
+void spread(List<int> state, int i, int M, int N) {
+  getNeighbors(i, M, N).forEach((x) {
     if (state[x] == 0) {
-      reveal(state, x);
+      reveal(state, x, M, N);
     }
   });
 }
 
-void reveal(List state, i) {
+void reveal(List<int> state, int i, int M, int N) {
   if (state[i] != 0) {
     return;
   }
-  var count = getNeighbors(i).map((x) {
+  var count = getNeighbors(i, M, N).map((x) {
     var neighbor = state[x];
     return (neighbor < 0 && neighbor != -3) ? 1 : 0;
   }).reduce((a, b) => a + b);
@@ -68,7 +62,7 @@ void reveal(List state, i) {
     state[i] = count;
   } else {
     state[i] = 9;
-    spread(state, i);
+    spread(state, i, M, N);
   }
 }
 
@@ -93,16 +87,39 @@ Future<void> restart(BuildContext context, bool success, f) {
   );
 }
 
+Future<void> settings(BuildContext context, f) {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Settings'),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Restart'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              f();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
 class _Home extends State<Home> {
-  List state = [];
+  List<int> state = [];
+  int N = 8, M = 30;
   @override
   void initState() {
     super.initState();
     reset();
   }
+
   void reset() {
     setState(() {
-      state = List.generate(LEN, (i) => i < LEN / 5 ? -1 : 0)..shuffle();
+      state = List.generate(M*N, (i) => i < M*N / 5 ? -1 : 0)..shuffle();
     });
   }
 
@@ -137,7 +154,7 @@ class _Home extends State<Home> {
                         return;
                       }
                       if (state[i] > -1) {
-                        reveal(state, i);
+                        reveal(state, i, M, N);
                       }
                       if (state.indexOf(0) == -1 && state.indexOf(-4) == -1) {
                         restart(context, true, reset);
@@ -147,14 +164,19 @@ class _Home extends State<Home> {
                 : null,
           ),
         )));
-    return new Center(
-      child: GridView.count(
-        crossAxisCount: N,
-        crossAxisSpacing: 7,
-        mainAxisSpacing: 7,
-        padding: const EdgeInsets.only(left: 7, right: 7, top: 7, bottom: 30),
-        children: buttons.toList(),
-      ),
-    );
+    return MaterialApp(
+        home: Scaffold(
+            appBar: new AppBar(
+                title: new Text("Flutter Minesweeper"), centerTitle: true),
+            body: Center(
+              child: GridView.count(
+                crossAxisCount: N,
+                crossAxisSpacing: 7,
+                mainAxisSpacing: 7,
+                padding: const EdgeInsets.only(
+                    left: 7, right: 7, top: 7, bottom: 30),
+                children: buttons.toList(),
+              ),
+            )));
   }
 }
