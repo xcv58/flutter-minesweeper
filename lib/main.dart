@@ -10,13 +10,13 @@ class Home extends StatelessWidget {
     return Scaffold(
         appBar: new AppBar(
             title: new Text("Flutter Minesweeper"), centerTitle: true),
-        body: new HomeContent());
+        body: new Content());
   }
 }
 
-class HomeContent extends StatefulWidget {
+class Content extends StatefulWidget {
   @override
-  _HomeContentState createState() => _HomeContentState();
+  _Content createState() => _Content();
 }
 
 String getContent(n) {
@@ -92,7 +92,7 @@ Future<void> restart(BuildContext context, bool success, f) {
   );
 }
 
-class _HomeContentState extends State<HomeContent> {
+class _Content extends State<Content> {
   List state = [];
   @override
   void initState() {
@@ -106,10 +106,6 @@ class _HomeContentState extends State<HomeContent> {
     var buttons = List.from(state.asMap().keys).map((i) => ButtonTheme(
             child: GestureDetector(
           onLongPress: () {
-            // -1 is unchecked
-            // -2 is marked correct
-            // -3 is marked incorrect
-            // -4 is clicked incorrect
             setState(() {
               if (state[i] > 0) {
                 return;
