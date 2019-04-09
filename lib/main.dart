@@ -136,43 +136,89 @@ class _Home extends State<Home> {
     });
   }
 
+  void mark(int i) {
+    setState(() {
+      if (state[i] > 0) {
+        return;
+      }
+      if (state[i] == -1) {
+        state[i] = -2;
+      } else if (state[i] == -2 || state[i] == -3) {
+        state[i] = 0;
+      } else {
+        state[i] = -3;
+      }
+      Feedback.forLongPress(context);
+    });
+  }
+
+  void onDoubleTap(int i) {
+    if (revealed(i)) {
+      revealNeighbor(i);
+    } else if (isMarked(i) || isBlank(i)) {
+      mark(i);
+    }
+  }
+
+  bool isMarked(int i) {
+    return state[i] == -2 || state[i] == -3;
+  }
+
+  bool isBlank(i) {
+    return state[i] == 0 || state[i] == -1;
+  }
+
+  void revealNeighbor(int i) {
+    setState(() {
+      var neighbors = getNeighbors(i, M, N);
+      var markedNeighborCount =
+          neighbors.map((x) => isMarked(x) ? 1 : 0).reduce((a, b) => a + b);
+      debugPrint('markedNeighborCount: $markedNeighborCount');
+      if (markedNeighborCount >= state[i]) {
+        neighbors.where(isBlank).forEach((x) {
+          onPressed(x);
+        });
+      }
+    });
+  }
+
+  void onPressed(i) {
+    setState(() {
+      if (state[i] == -1) {
+        state[i] = -4;
+        restart(context, false, reset);
+        return;
+      }
+      if (state[i] > -1) {
+        reveal(state, i, M, N);
+      }
+      if (state.indexOf(0) == -1 && state.indexOf(-4) == -1) {
+        restart(context, true, reset);
+      }
+    });
+  }
+
+  bool revealed(i) {
+    return state[i] > 0 && state[i] < 9;
+  }
+
   Widget _button(i) {
-    var onPressed = () {
-      setState(() {
-        if (state[i] == -1) {
-          state[i] = -4;
-          restart(context, false, reset);
-          return;
-        }
-        if (state[i] > -1) {
-          reveal(state, i, M, N);
-        }
-        if (state.indexOf(0) == -1 && state.indexOf(-4) == -1) {
-          restart(context, true, reset);
-        }
-      });
-    };
     var child = FlatButton(
         color: Colors.blue,
         disabledColor: Colors.grey,
         child: Text(getContent(state[i]),
             textAlign: TextAlign.center, style: TextStyle(fontSize: 25)),
-        onPressed: state[i] <= 0 ? onPressed : null);
+        onPressed: state[i] <= 0
+            ? () {
+                onPressed(i);
+              }
+            : null);
     return GestureDetector(
+      onDoubleTap: () {
+        onDoubleTap(i);
+      },
       onLongPress: () {
-        setState(() {
-          if (state[i] > 0) {
-            return;
-          }
-          if (state[i] == -1) {
-            state[i] = -2;
-          } else if (state[i] == -2 || state[i] == -3) {
-            state[i] = 0;
-          } else {
-            state[i] = -3;
-          }
-          Feedback.forLongPress(context);
-        });
+        onDoubleTap(i);
       },
       child: child,
     );
