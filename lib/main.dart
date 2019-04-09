@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() => runApp(App());
 
@@ -148,7 +149,7 @@ class _Home extends State<Home> {
       } else {
         state[i] = -3;
       }
-      Feedback.forLongPress(context);
+      HapticFeedback.mediumImpact();
     });
   }
 
@@ -177,6 +178,7 @@ class _Home extends State<Home> {
         neighbors.where(isBlank).forEach((x) {
           onPressed(x);
         });
+        HapticFeedback.mediumImpact();
       }
     });
   }
