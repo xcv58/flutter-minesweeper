@@ -153,7 +153,7 @@ class _Home extends State<Home> {
   }
 
   void onDoubleTap(int i) {
-    if (revealed(i)) {
+    if (isRevealed(i)) {
       revealNeighbor(i);
     } else if (isMarked(i) || isBlank(i)) {
       mark(i);
@@ -197,7 +197,7 @@ class _Home extends State<Home> {
     });
   }
 
-  bool revealed(i) {
+  bool isRevealed(i) {
     return state[i] > 0 && state[i] < 9;
   }
 
@@ -216,6 +216,9 @@ class _Home extends State<Home> {
       onLongPress: () {
         onDoubleTap(i);
       },
+      onDoubleTap: isRevealed(i) ? () {
+        onDoubleTap(i);
+      } : null,
       child: child,
     );
   }
