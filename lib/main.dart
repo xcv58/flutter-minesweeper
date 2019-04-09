@@ -68,6 +68,7 @@ void reveal(List<int> state, int i, int M, int N) {
 }
 
 restart(BuildContext context, bool win, f) {
+  HapticFeedback.heavyImpact();
   return showDialog(
     context: context,
     barrierDismissible: false,
@@ -175,10 +176,13 @@ class _Home extends State<Home> {
       var markedNeighborCount =
           neighbors.map((x) => isMarked(x) ? 1 : 0).reduce((a, b) => a + b);
       if (markedNeighborCount >= state[i]) {
-        neighbors.where(isBlank).forEach((x) {
-          onPressed(x);
-        });
-        HapticFeedback.mediumImpact();
+        var blankNeighbors = neighbors.where(isBlank);
+        if (blankNeighbors.length > 0) {
+          HapticFeedback.mediumImpact();
+          blankNeighbors.forEach((x) {
+            onPressed(x);
+          });
+        }
       }
     });
   }
@@ -218,9 +222,11 @@ class _Home extends State<Home> {
       onLongPress: () {
         onDoubleTap(i);
       },
-      onDoubleTap: isRevealed(i) ? () {
-        onDoubleTap(i);
-      } : null,
+      onDoubleTap: isRevealed(i)
+          ? () {
+              onDoubleTap(i);
+            }
+          : null,
       child: child,
     );
   }
