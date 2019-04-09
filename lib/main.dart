@@ -173,7 +173,6 @@ class _Home extends State<Home> {
       var neighbors = getNeighbors(i, M, N);
       var markedNeighborCount =
           neighbors.map((x) => isMarked(x) ? 1 : 0).reduce((a, b) => a + b);
-      debugPrint('markedNeighborCount: $markedNeighborCount');
       if (markedNeighborCount >= state[i]) {
         neighbors.where(isBlank).forEach((x) {
           onPressed(x);
@@ -214,9 +213,6 @@ class _Home extends State<Home> {
               }
             : null);
     return GestureDetector(
-      onDoubleTap: () {
-        onDoubleTap(i);
-      },
       onLongPress: () {
         onDoubleTap(i);
       },
