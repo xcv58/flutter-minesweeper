@@ -154,7 +154,7 @@ class _Home extends State<Home> {
     });
   }
 
-  void onDoubleTap(int i) {
+  void revealOrMark(int i) {
     if (isRevealed(i)) {
       revealNeighbor(i);
     } else if (isMarked(i) || isBlank(i)) {
@@ -220,11 +220,11 @@ class _Home extends State<Home> {
             : null);
     return GestureDetector(
       onLongPress: () {
-        onDoubleTap(i);
+        revealOrMark(i);
       },
-      onDoubleTap: isRevealed(i)
+      onTap: isRevealed(i)
           ? () {
-              onDoubleTap(i);
+              revealNeighbor(i);
             }
           : null,
       child: child,
