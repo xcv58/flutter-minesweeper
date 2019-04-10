@@ -173,15 +173,21 @@ class _Home extends State<Home> {
   void revealNeighbor(int i) {
     setState(() {
       var neighbors = getNeighbors(i, M, N);
+      var blankNeighbors = neighbors.where(isBlank);
       var markedNeighborCount =
           neighbors.map((x) => isMarked(x) ? 1 : 0).reduce((a, b) => a + b);
       if (markedNeighborCount >= state[i]) {
-        var blankNeighbors = neighbors.where(isBlank);
         if (blankNeighbors.length > 0) {
           HapticFeedback.mediumImpact();
           blankNeighbors.forEach((x) {
             onPressed(x);
           });
+        }
+      } else {
+        if (blankNeighbors.length == state[i] - markedNeighborCount) {
+          if (blankNeighbors.length > 0) {
+            blankNeighbors.forEach(mark);
+          }
         }
       }
     });
