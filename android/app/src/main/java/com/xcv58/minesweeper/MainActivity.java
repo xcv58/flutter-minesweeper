@@ -1,4 +1,4 @@
-package com.example.flutter_create;
+package com.xcv58.minesweeper;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;

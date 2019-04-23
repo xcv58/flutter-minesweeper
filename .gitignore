@@ -36,6 +36,9 @@
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
 .project
+android/.settings/
+android/app/.classpath
+android/app/.settings/
 
 # iOS/XCode related
 **/ios/**/*.mode1v3
