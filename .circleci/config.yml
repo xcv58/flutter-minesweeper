@@ -7,6 +7,6 @@ jobs:
     steps:
       - checkout
       - run: flutter doctor
-      - run: cat ${KEY_PROPERTIES} | base64 --decode > ~/src/android/key.properties
-      - run: mkdir ~/keys && cat ${JSON_KEY_DATA} | base64 --decode > ~/keys/api.json
+      - run: echo ${KEY_PROPERTIES} | base64 --decode > ~/src/android/key.properties
+      - run: mkdir ~/keys && echo ${JSON_KEY_DATA} | base64 --decode > ~/keys/api.json
       - run: flutter build appbundle
