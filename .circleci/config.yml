@@ -9,4 +9,5 @@ jobs:
       - run: flutter doctor
       - run: echo ${KEY_PROPERTIES} | base64 --decode > ~/src/android/key.properties
       - run: mkdir ~/keys && echo ${JSON_KEY_DATA} | base64 --decode > ~/keys/api.json
+      - run: mkdir ~/keys && echo ${MINESWEEPER_JKS} | base64 --decode > ~/keys/minesweeper.jks
       - run: flutter build appbundle
