@@ -1,0 +1,2 @@
+json_key_file("~/keys/api-7529015001737321481-762752-cc8254f73f46.json") # Path to the json secret file - Follow https://docs.fastlane.tools/actions/supply/#setup to get one
+package_name("com.xcv58.minesweeper") # e.g. com.krausefx.app
