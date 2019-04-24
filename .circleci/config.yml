@@ -1,9 +1,12 @@
 version: 2
 jobs:
   build:
+    working_directory: ~/src
     docker:
       - image: cirrusci/flutter
     steps:
       - checkout
       - run: flutter doctor
+      - run: mkdir ~/keys && cat "${JSON_KEY_DATA}" > ~/keys/api-7529015001737321481-762752-cc8254f73f46.json
+      - run: mkdir ~/src/android/ && cat "${KEY_PROPERTIES}" > ~/src/android/key.properties
       - run: flutter build appbundle
