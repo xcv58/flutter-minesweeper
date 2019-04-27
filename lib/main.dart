@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:math';
 
 void main() => runApp(App());
 
@@ -135,7 +136,28 @@ class _Home extends State<Home> {
   void reset() {
     setState(() {
       state = List.generate(M * N, (i) => i < M * N / 5 ? -1 : 0)..shuffle();
+      initReveal();
     });
+  }
+
+  void initReveal() {
+    int cells = 0;
+    var random = new Random();
+    while (cells < 2) {
+      var index = random.nextInt(M * N);
+      if (state[index] != 0) {
+        continue;
+      }
+      var count = getNeighbors(index, M, N).map((x) {
+        var neighbor = state[x];
+        return (neighbor < 0 && neighbor != -3) ? 1 : 0;
+      }).reduce((a, b) => a + b);
+      if (count == 0) {
+        state[index] = 9;
+        spread(state, index, M, N);
+        cells += 1;
+      }
+    }
   }
 
   void mark(int i) {
